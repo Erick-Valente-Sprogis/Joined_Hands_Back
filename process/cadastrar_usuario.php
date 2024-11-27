@@ -1,27 +1,50 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $db = new PDO('sqlite:joined_hands.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+header('Content-Type: application/json');
 
-        // Captura os dados do formulário
-        $nome = htmlspecialchars($_POST['nome']);
-        $email = htmlspecialchars($_POST['email']);
-        $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT); // Criptografa a senha
+// Lê os dados recebidos como JSON
+$data = json_decode(file_get_contents('php://input'), true);
 
-        // Insere o usuário no banco de dados
-        $stmt = $db->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)");
-        $stmt->bindParam(':nome', $nome);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':senha', $senha);
-        $stmt->execute();
+if (!isset($data['nome_completo'], $data['email'], $data['senha'])) {
+    echo json_encode(['message' => 'Dados incompletos!']);
+    exit;
+}
 
-        echo "Usuário cadastrado com sucesso!";
-    } catch (PDOException $e) {
-        if ($e->getCode() == 23000) {
-            echo "O e-mail já está cadastrado.";
-        } else {
-            echo "Erro ao cadastrar usuário: " . $e->getMessage();
-        }
+$nome = htmlspecialchars($data['nome_completo']);
+$email = htmlspecialchars($data['email']);
+$senha = password_hash($data['senha'], PASSWORD_DEFAULT);
+$telefone = htmlspecialchars($data['telefone']);
+$cep = htmlspecialchars($data['cep']);
+$logradouro = htmlspecialchars($data['logradouro']);
+
+try {
+    // Conexão com o banco de dados SQLite
+    $db = new PDO('jdbc:sqlite:C:\Users\erick\OneDrive\Área de Trabalho\Joined_Hands\database\joined_hands.db');
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Verifica se o e-mail já está cadastrado
+    $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = :email");
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['message' => 'E-mail já cadastrado.']);
+        exit;
     }
+
+    // Insere o usuário no banco de dados
+    $stmt = $db->prepare("INSERT INTO usuarios (nome, email, senha, tel, cep, logd) VALUES (:nome, :email, :senha, :tel, :cep, :logd)");
+    $stmt->bindParam(':nome', $nome);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':senha', $senha);
+    $stmt->bindParam(':tel', $telefone);
+    $stmt->bindParam(':cep', $cep);
+    $stmt->bindParam(':logd', $logradouro);
+
+    if ($stmt->execute()) {
+        echo json_encode(['message' => 'Cadastro realizado com sucesso!']);
+    } else {
+        echo json_encode(['message' => 'Erro ao realizar o cadastro.']);
+    }
+} catch (PDOException $e) {
+    echo json_encode(['message' => 'Erro no banco de dados: ' . $e->getMessage()]);
 }
