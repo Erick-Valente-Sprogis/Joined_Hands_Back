@@ -1,7 +1,7 @@
 <?php
 try {
     // Conexão com o banco de dados
-    $db = new PDO('sqlite:C:/xampp/htdocs/Joined Hands/database/joined_hands.db'); // Ajuste o caminho caso necessário
+    $db = new PDO('sqlite:C:\Users\erick\OneDrive\Área de Trabalho\Joined_Hands\database\joined_hands.db'); // Ajuste o caminho caso necessário
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Criação da tabela 'usuarios'
