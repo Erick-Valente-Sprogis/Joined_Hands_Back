@@ -1,7 +1,7 @@
 <?php
 try {
     // Cria (ou abre) o banco de dados SQLite
-    $db = new PDO('sqlite:joined_hands.db');
+    $db = new PDO('sqlite:C:\Users\erick\OneDrive\Área de Trabalho\Joined_Hands\database\joined_hands.db');
 
     // Configura para lançar exceções em caso de erro
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
